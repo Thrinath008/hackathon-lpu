@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CoolFileUpload from "@/components/CoolFileUpload";
@@ -53,6 +54,7 @@ export default function CVUploadPage() {
     }
   };
   
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-lightPurple/40 to-white py-14">
       <Card className="w-full max-w-lg shadow-2xl animate-fade-in">
