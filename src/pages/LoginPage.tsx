@@ -20,10 +20,10 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/dashboard");
+      navigate("/dashboard"); // Redirect after successful login
     } catch (error) {
       console.error("Login failed:", error);
-      alert("Invalid email or password!");
+      alert("Invalid email or password!"); // Show error message if login fails
     } finally {
       setIsLoading(false);
     }
@@ -33,11 +33,11 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      await signInWithPopup(auth, googleProvider);
-      navigate("/dashboard");
+      await signInWithPopup(auth, googleProvider); // Use Firebase's Google provider
+      navigate("/dashboard"); // Redirect after successful Google login
     } catch (error) {
       console.error("Google sign-in failed:", error);
-      alert("Google sign-in failed!");
+      alert("Google sign-in failed!"); // Show error message if Google login fails
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +68,7 @@ export default function LoginPage() {
                 placeholder="m@example.com"
                 required
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)} // Set email state
               />
             </div>
             <div className="space-y-2">
@@ -83,15 +83,15 @@ export default function LoginPage() {
                 type="password"
                 required
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)} // Set password state
               />
             </div>
             <Button 
               type="submit" 
               className="w-full bg-brand-purple hover:bg-brand-purple/90"
-              disabled={isLoading}
+              disabled={isLoading} // Disable button while loading
             >
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? "Signing in..." : "Sign in"} {/* Show loading text */}
             </Button>
           </form>
           <div className="mt-4">
@@ -106,11 +106,12 @@ export default function LoginPage() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4 mt-4">
+              {/* Google login button */}
               <Button 
                 variant="outline" 
                 className="w-full"
                 onClick={handleGoogleSignIn}
-                disabled={isLoading}
+                disabled={isLoading} // Disable Google button while loading
               >
                 Google
               </Button>
