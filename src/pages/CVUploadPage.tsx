@@ -1,4 +1,4 @@
-
+// src/pages/CVUploadPage.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CoolFileUpload from "@/components/CoolFileUpload";
@@ -6,11 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { storage, db, auth } from "../firebase"; // Import Firebase services
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { db, auth } from "../firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { uploadToCloudinary } from "@/lib/uploadToCloudinary";
-
 
 export default function CVUploadPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -23,29 +21,55 @@ export default function CVUploadPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file || !name) return;
-  
+
     setIsLoading(true);
-  
+
     try {
-      // Upload to Cloudinary
+      // Upload CV to Cloudinary
       const cloudinaryUrl = await uploadToCloudinary(file);
-  
       if (!cloudinaryUrl) {
         alert("CV upload failed.");
         setIsLoading(false);
         return;
       }
-  
-      // Store in Firestore
-      await setDoc(doc(db, "users", auth.currentUser?.uid!), {
+
+      // Get avatar from Firebase auth (Google photoURL) or use placeholder
+      const avatarUrl = auth.currentUser?.photoURL || "/default-profile.jpg";
+
+      // Create full user data structure
+      const userData = {
         name,
         university,
         extra,
-        cvPdf: cloudinaryUrl, // Save Cloudinary URL instead
-        email: auth.currentUser?.email,
+        email: auth.currentUser?.email || "",
+        cvPdf: cloudinaryUrl,
         createdAt: new Date(),
-      });
-  
+        title: "", // Default empty string
+        location: "",
+        bio: "",
+        website: "",
+        github: "",
+        linkedin: "",
+        avatar: avatarUrl,
+        tecoRank: 0, // Default number
+        rankLevel: "",
+        rankPercentile: 0,
+        skills: [], // Default empty array
+        projects: [],
+        achievements: [],
+        performanceMetrics: {
+          codeQuality: 0,
+          problemSolving: 0,
+          teamwork: 0,
+          communication: 0,
+          projectManagement: 0,
+          technicalSkills: 0,
+        },
+      };
+
+      // Store in Firestore
+      await setDoc(doc(db, "users", auth.currentUser!.uid), userData);
+
       setIsLoading(false);
       navigate("/dashboard");
     } catch (error) {
@@ -53,7 +77,6 @@ export default function CVUploadPage() {
       setIsLoading(false);
     }
   };
-  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-lightPurple/40 to-white py-14">
@@ -70,7 +93,7 @@ export default function CVUploadPage() {
                 id="name"
                 required
                 value={name}
-                onChange={e => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="Your name"
               />
             </div>
@@ -79,7 +102,7 @@ export default function CVUploadPage() {
               <Input
                 id="university"
                 value={university}
-                onChange={e => setUniversity(e.target.value)}
+                onChange={(e) => setUniversity(e.target.value)}
                 placeholder="Your university"
               />
             </div>
@@ -88,16 +111,13 @@ export default function CVUploadPage() {
               <Input
                 id="extra"
                 value={extra}
-                onChange={e => setExtra(e.target.value)}
+                onChange={(e) => setExtra(e.target.value)}
                 placeholder="Eg. Open to remote projects"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="cv">CV/Resume</Label>
-              <CoolFileUpload
-                value={file}
-                onChange={setFile}
-              />
+              <CoolFileUpload value={file} onChange={setFile} />
             </div>
             <Button
               type="submit"
