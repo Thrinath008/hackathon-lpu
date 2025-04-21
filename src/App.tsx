@@ -9,11 +9,13 @@ import { useEffect, useState } from "react"; // Import React hooks
 import Index from "./pages/Index";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import DashboardPage from "./pages/DashboardPage";
 import NotFound from "./pages/NotFound";
 import CVUploadPage from "./pages/CVUploadPage";
 import FindMembersPage from "./pages/FindMembersPage";
 import ProfilePage from "./pages/ProfilePage";
+import ProtectedLayout from "@/components/ProtectedLayout"; 
+import DashboardPage from "./pages/DashboardPage"; // Import the DashboardPage component
+// Import the ProtectedLayout
 
 const queryClient = new QueryClient();
 
@@ -44,12 +46,14 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" />} />
             <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" />} />
-            
-            {/* Protected Routes (Require authentication) */}
-            <Route path="/cv-upload" element={isAuthenticated ? <CVUploadPage /> : <Navigate to="/login" />} />
-            <Route path="/find-members" element={isAuthenticated ? <FindMembersPage /> : <Navigate to="/login" />} />
-            <Route path="/profile/:userId" element={isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />} />
-            <Route path="/dashboard" element={isAuthenticated ? <DashboardPage /> : <Navigate to="/login" />} />
+
+            {/* Protected Routes */}
+            <Route element={<ProtectedLayout />}>
+              <Route path="/dashboard" element={isAuthenticated ? <DashboardPage /> : <Navigate to="/login" />} />
+              <Route path="/cv-upload" element={isAuthenticated ? <CVUploadPage /> : <Navigate to="/login" />} />
+              <Route path="/find-members" element={isAuthenticated ? <FindMembersPage /> : <Navigate to="/login" />} />
+              <Route path="/profile/:userId" element={isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />} />
+            </Route>
 
             {/* Catch-all for 404 */}
             <Route path="*" element={<NotFound />} />
