@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CoolFileUpload from "@/components/CoolFileUpload";
@@ -6,25 +5,54 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { storage, db, auth } from "../firebase"; // Import Firebase services
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { doc, setDoc } from "firebase/firestore";
+import { uploadToCloudinary } from "@/lib/uploadToCloudinary";
+
 
 export default function CVUploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [name, setName] = useState("");
   const [university, setUniversity] = useState("");
   const [extra, setExtra] = useState("");
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!file || !name) return;
+  
     setIsLoading(true);
-    // (Mock) In real app: upload file & info to backend (Firebase)
-    setTimeout(() => {
+  
+    try {
+      // Upload to Cloudinary
+      const cloudinaryUrl = await uploadToCloudinary(file);
+  
+      if (!cloudinaryUrl) {
+        alert("CV upload failed.");
+        setIsLoading(false);
+        return;
+      }
+  
+      // Store in Firestore
+      await setDoc(doc(db, "users", auth.currentUser?.uid!), {
+        name,
+        university,
+        extra,
+        cvPdf: cloudinaryUrl, // Save Cloudinary URL instead
+        email: auth.currentUser?.email,
+        createdAt: new Date(),
+      });
+  
       setIsLoading(false);
       navigate("/dashboard");
-    }, 1200);
+    } catch (error) {
+      console.error("Error uploading file or saving to Firestore: ", error);
+      setIsLoading(false);
+    }
   };
-
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-lightPurple/40 to-white py-14">
       <Card className="w-full max-w-lg shadow-2xl animate-fade-in">

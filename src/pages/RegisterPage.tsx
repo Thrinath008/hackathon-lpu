@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,15 +5,42 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Github } from "lucide-react";
+import { auth, googleProvider } from "../firebase"; // Import GoogleAuthProvider
+import { signInWithPopup } from "firebase/auth";
 
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Function to handle Google sign-in
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      // Perform sign-in with popup
+      const result = await signInWithPopup(auth, googleProvider);
+
+      // Extract user information
+      const user = result.user;
+      console.log("Google User: ", user);
+
+      // Check if user is authenticated
+      if (user) {
+        console.log("User is authenticated:", user);
+        // After successful sign-in, navigate to the CV upload page
+        navigate("/cv-upload");
+      } else {
+        console.error("User authentication failed");
+      }
+    } catch (error) {
+      console.error("Error signing in with Google: ", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // (Mock) In real app: Register user with Firebase
     setTimeout(() => {
       setIsLoading(false);
       navigate("/cv-upload");
@@ -58,6 +84,7 @@ export default function RegisterPage() {
               {isLoading ? "Creating account..." : "Create account"}
             </Button>
           </form>
+
           <div className="mt-4">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -69,8 +96,15 @@ export default function RegisterPage() {
                 </span>
               </div>
             </div>
+
+            {/* Google Sign-In Button */}
             <div className="grid grid-cols-2 gap-4 mt-4">
-              <Button variant="outline" className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={handleGoogleSignIn}
+                disabled={isLoading}
+              >
                 Google
               </Button>
               <Button variant="outline" className="w-full">
@@ -78,6 +112,7 @@ export default function RegisterPage() {
                 GitHub
               </Button>
             </div>
+
             <p className="text-center mt-4 text-sm">
               Already have an account?{" "}
               <Link to="/login" className="text-brand-purple hover:underline">
