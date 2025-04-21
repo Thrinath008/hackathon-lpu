@@ -2,13 +2,17 @@
 // src/pages/ProfilePage.tsx
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Star, Sparkles, Code, Award, MapPin, Mail, Globe, Github, Linkedin, Monitor, Zap, BookOpen, Edit, FileText, X } from "lucide-react";
 import { db, auth } from "../firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { uploadToCloudinary } from "@/lib/uploadToCloudinary";
+import { Document, Page, pdfjs } from "react-pdf";
+
+// Set up the PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 // TypeScript interfaces for user data
 interface Skill {
@@ -66,9 +70,25 @@ interface UserData {
   createdAt: any; // Firestore timestamp
 }
 
-// PDF Viewer Modal Component
+// PDF Viewer Modal Component using react-pdf
 const PDFViewerModal = ({ isOpen, onClose, pdfUrl }: { isOpen: boolean; onClose: () => void; pdfUrl: string }) => {
+  const [numPages, setNumPages] = useState<number>(0);
+  const [error, setError] = useState<string | null>(null);
+
   if (!isOpen) return null;
+
+  // Transform Cloudinary URL to use /raw/upload/ instead of /image/upload/
+  const transformedPdfUrl = pdfUrl.replace("/image/upload/", "/raw/upload/");
+
+  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    setNumPages(numPages);
+    setError(null);
+  };
+
+  const onDocumentLoadError = (error: Error) => {
+    console.error("Error loading PDF:", error);
+    setError("Failed to load PDF. Please try again or download the file.");
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -79,18 +99,37 @@ const PDFViewerModal = ({ isOpen, onClose, pdfUrl }: { isOpen: boolean; onClose:
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="flex-1 p-1 overflow-hidden">
-          <iframe src={pdfUrl} className="w-full h-full border-0" title="CV/Resume PDF Viewer" />
-        </div>
-        <div className="p-4 border-t flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
-          <Button>
-            <a href={pdfUrl} download>
-              Download PDF
-            </a>
-          </Button>
+        <div className="flex-1 p-4 overflow-auto">
+          {error ? (
+            <div className="text-red-600 text-center">
+              <p>{error}</p>
+              <a
+                href={transformedPdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline"
+              >
+                Open PDF in new tab
+              </a>
+            </div>
+          ) : (
+            <Document
+              file={transformedPdfUrl}
+              onLoadSuccess={onDocumentLoadSuccess}
+              onLoadError={onDocumentLoadError}
+              className="w-full h-full"
+            >
+              {Array.from(new Array(numPages), (_, index) => (
+                <Page
+                  key={`page_${index + 1}`}
+                  pageNumber={index + 1}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                  width={Math.min(800, window.innerWidth - 40)} // Responsive width
+                />
+              ))}
+            </Document>
+          )}
         </div>
       </div>
     </div>
