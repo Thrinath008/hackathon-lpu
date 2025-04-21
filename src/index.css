@@ -1,0 +1,83 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    --primary: 267 80% 65%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 240 10% 29.9%;
+
+    --muted: 267 70% 97%;
+    --muted-foreground: 215.4 16.3% 60%;
+
+    --accent: 283 100% 94%;
+    --accent-foreground: 267 80% 65%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 267 60% 92%;
+    --input: 267 60% 92%;
+    --ring: 267 80% 65%;
+
+    --radius: 1.5rem;
+  }
+  html {
+    font-family: 'Poppins', system-ui, sans-serif;
+    background: var(--background);
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    letter-spacing: 0.02em;
+    background-image: linear-gradient(112deg, #ffe5ef 0%, #e5defe 50%, #d3f4fd 100%);
+    min-height: 100vh;
+  }
+  .genz-card {
+    @apply rounded-xl bg-gradient-to-br from-brand-lightPurple via-white to-brand-blue shadow-xl border p-8;
+    backdrop-filter: blur(10px);
+  }
+  .glass {
+    @apply backdrop-blur-2xl bg-white/30 border border-brand-purple/10 shadow-2xl rounded-2xl;
+  }
+  .section-title {
+    @apply text-4xl md:text-5xl font-bold text-brand-purple mb-4 tracking-tight;
+    letter-spacing: -0.02em;
+  }
+  .brand-gradient-text {
+    background: linear-gradient(94deg, #BA6FF7 35%, #59DDE6 80%, #FEF7CD 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .card-gradient {
+    @apply bg-gradient-to-br from-brand-lightPurple/90 via-white/70 to-brand-blue/80 rounded-xl;
+  }
+  .fade-in {
+    opacity: 0;
+    animation: fade-in 0.5s ease-out forwards;
+  }
+  .hover-scale {
+    @apply transform transition-transform hover:scale-105;
+  }
+  input[type="file"] {
+    display: none;
+  }
+}
+@layer utilities {
+  .text-shadow-fun {
+    text-shadow: 0px 1px 0px #fff, 1px 0px 5px #c6a4fa24;
+  }
+}
