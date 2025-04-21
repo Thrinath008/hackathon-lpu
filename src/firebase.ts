@@ -4,13 +4,14 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
+// Use environment variables for Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyAfdoQwFotZcoaohFycqcaVXJp-q7m0B3A",
-  authDomain: "hackathon-lpu.firebaseapp.com",
-  projectId: "hackathon-lpu",
-  storageBucket: "hackathon-lpu.appspot.com",
-  messagingSenderId: "566499491213",
-  appId: "1:566499491213:web:e0a4cd8056f5d7097cd1c4"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 const app = initializeApp(firebaseConfig);
