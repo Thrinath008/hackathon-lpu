@@ -49,14 +49,12 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("projects");
   const currentUser = auth.currentUser;
 
-  // Fetch pending requests and friends
   useEffect(() => {
     if (!currentUser) {
       console.log("No current user, skipping fetch.");
       return;
     }
 
-    // Fetch pending requests
     const fetchRequests = async () => {
       try {
         console.log("Fetching requests for UID:", currentUser.uid);
@@ -70,7 +68,6 @@ export default function DashboardPage() {
         for (const reqDoc of querySnapshot.docs) {
           const req = reqDoc.data();
           console.log("Request found:", req);
-          // Get sender's name and role
           const userRef = doc(db, "users", req.fromUid);
           const userDoc = await getDoc(userRef);
           const userData = userDoc.data();
@@ -93,7 +90,6 @@ export default function DashboardPage() {
       }
     };
 
-    // Fetch friends
     const fetchFriends = async () => {
       try {
         console.log("Fetching friends for UID:", currentUser.uid);
@@ -127,7 +123,6 @@ export default function DashboardPage() {
     fetchFriends();
   }, [currentUser]);
 
-  // Handle accept/reject request
   const handleRequestAction = async (requestId: string, action: "accepted" | "rejected") => {
     if (!currentUser) {
       alert("Please log in to perform this action.");
@@ -152,13 +147,10 @@ export default function DashboardPage() {
       }
 
       if (action === "accepted") {
-        // Update request status
         await updateDoc(requestRef, { status: "accepted" });
         console.log("Request status updated to accepted.");
-        // Add to both users' friends
         const fromUserRef = doc(db, "users", requestData.fromUid);
         const toUserRef = doc(db, "users", currentUser.uid);
-        // Verify users exist
         const fromUserDoc = await getDoc(fromUserRef);
         const toUserDoc = await getDoc(toUserRef);
         if (!fromUserDoc.exists() || !toUserDoc.exists()) {
@@ -170,12 +162,10 @@ export default function DashboardPage() {
         await updateDoc(toUserRef, { friends: arrayUnion(requestData.fromUid) });
         console.log(`Added ${currentUser.uid} to ${requestData.fromUid}'s friends and vice versa.`);
       } else {
-        // Update request status
         await updateDoc(requestRef, { status: "rejected" });
         console.log("Request status updated to rejected.");
       }
 
-      // Remove from requests
       setRequests(requests => requests.filter(req => req.id !== requestId));
       alert(`${action.charAt(0).toUpperCase() + action.slice(1)} request successfully!`);
     } catch (error: any) {
@@ -184,7 +174,6 @@ export default function DashboardPage() {
     }
   };
 
-  // Open chat modal
   const handleOpenChat = (friend: { uid: string; name: string }) => {
     setChatUser(friend);
     setChatOpen(true);
@@ -192,17 +181,17 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="container py-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <div className="flex gap-4">
-            <Button className="bg-brand-purple hover:bg-brand-purple/90">
+      <main className="container py-6 px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <Button className="bg-brand-purple hover:bg-brand-purple/90 w-full sm:w-auto text-base py-2">
               <Plus className="mr-2 h-4 w-4" />
               New Project
             </Button>
             <Button
               variant="outline"
-              className="border-brand-lightPurple hover:bg-brand-lightPurple/20"
+              className="border-brand-lightPurple hover:bg-brand-lightPurple/20 w-full sm:w-auto text-base py-2"
               onClick={() => setActiveTab("search")}
             >
               <Search className="mr-2 h-4 w-4" />
@@ -211,20 +200,22 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full max-w-lg grid-cols-4">
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="requests">Requests</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
-            <TabsTrigger value="search">Search Profiles</TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <div className="overflow-x-auto">
+            <TabsList className="inline-flex w-full max-w-full sm:max-w-lg bg-transparent p-0">
+              <TabsTrigger value="projects" className="text-base px-3 py-2">Projects</TabsTrigger>
+              <TabsTrigger value="requests" className="text-base px-3 py-2">Requests</TabsTrigger>
+              <TabsTrigger value="notifications" className="text-base px-3 py-2">Notifications</TabsTrigger>
+              <TabsTrigger value="search" className="text-base px-3 py-2">Search Profiles</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="projects" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {projects.map(project => (
                 <Card key={project.id}>
                   <CardHeader className="pb-2">
-                    <CardTitle>{project.title}</CardTitle>
+                    <CardTitle className="text-lg">{project.title}</CardTitle>
                     <CardDescription>{project.members} team members</CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -239,8 +230,8 @@ export default function DashboardPage() {
                           style={{ width: `${project.progress}%` }}
                         />
                       </div>
-                      <div className="pt-4">
-                        <Button variant="outline" className="w-full">View Project</Button>
+                      <div className="pt-3">
+                        <Button variant="outline" className="w-full text-base py-2">View Project</Button>
                       </div>
                     </div>
                   </CardContent>
@@ -251,13 +242,13 @@ export default function DashboardPage() {
 
           <TabsContent value="requests" className="space-y-4">
             <div className="grid gap-4">
-              <h2 className="text-xl font-bold">Pending Requests</h2>
+              <h2 className="text-lg font-bold">Pending Requests</h2>
               {requests.length === 0 ? (
                 <p className="text-muted-foreground">No pending requests.</p>
               ) : (
                 requests.map(request => (
                   <Card key={request.id}>
-                    <CardContent className="p-4 flex justify-between items-center">
+                    <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                       <div>
                         <p className="font-semibold">{request.fromName}</p>
                         <p className="text-sm text-muted-foreground">{request.fromRole}</p>
@@ -265,15 +256,16 @@ export default function DashboardPage() {
                           Sent: {new Date(request.createdAt).toLocaleString()}
                         </p>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 w-full sm:w-auto">
                         <Button
                           onClick={() => handleRequestAction(request.id, "accepted")}
-                          className="bg-brand-purple hover:bg-brand-purple/90"
+                          className="bg-brand-purple hover:bg-brand-purple/90 w-full sm:w-auto text-base py-2"
                         >
                           Accept
                         </Button>
                         <Button
                           onClick={() => handleRequestAction(request.id, "rejected")}
+                          className="w-full sm:w-auto text-base py-2"
                           variant="outline"
                         >
                           Reject
@@ -283,17 +275,17 @@ export default function DashboardPage() {
                   </Card>
                 ))
               )}
-              <h2 className="text-xl font-bold mt-6">Friends</h2>
+              <h2 className="text-lg font-bold mt-4">Friends</h2>
               {friends.length === 0 ? (
                 <p className="text-muted-foreground">No friends yet.</p>
               ) : (
                 friends.map(friend => (
                   <Card key={friend.uid}>
-                    <CardContent className="p-4 flex justify-between items-center">
+                    <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                       <p className="font-semibold">{friend.name}</p>
                       <Button
                         onClick={() => handleOpenChat(friend)}
-                        className="bg-brand-pink hover:bg-brand-purple/80"
+                        className="bg-brand-pink hover:bg-brand-purple/80 w-full sm:w-auto text-base py-2"
                       >
                         <MessageSquare className="mr-2 h-4 w-4" />
                         Chat

@@ -115,21 +115,23 @@ export default function ChatModal({ friend, onClose }: ChatModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-md glass border-brand-purple/20">
-        <CardContent className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-brand-purple">Chat with {friend.name}</h2>
-            <Button variant="ghost" onClick={onClose} className="text-brand-pink">Close</Button>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-sm glass border-brand-purple/20 overflow-hidden">
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-lg font-bold text-brand-purple truncate">Chat with {friend.name}</h2>
+            <Button variant="ghost" onClick={onClose} className="text-brand-pink p-1">
+              Close
+            </Button>
           </div>
-          <div className="h-64 overflow-y-auto mb-4 p-4 bg-white/80 rounded-lg">
+          <div className="max-h-[50vh] overflow-y-auto mb-3 p-3 bg-white/80 rounded-lg">
             {messages.length === 0 ? (
-              <p className="text-muted-foreground text-center">No messages</p>
+              <p className="text-muted-foreground text-center text-sm">No messages</p>
             ) : (
               messages.map(msg => (
                 <div
                   key={msg.id}
-                  className={`mb-2 p-2 rounded-lg max-w-[75%] ${
+                  className={`mb-2 p-2 rounded-lg max-w-[80%] ${
                     msg.senderUid === currentUser?.uid
                       ? "bg-brand-purple/20 ml-auto"
                       : "bg-brand-lightPurple/20 mr-auto"
@@ -148,10 +150,10 @@ export default function ChatModal({ friend, onClose }: ChatModalProps) {
               value={newMessage}
               onChange={e => setNewMessage(e.target.value)}
               placeholder="Type a message..."
-              className="bg-white/80 border-brand-lightPurple"
+              className="bg-white/80 border-brand-lightPurple text-base py-2"
               onKeyDown={e => e.key === "Enter" && sendMessage()}
             />
-            <Button onClick={sendMessage} className="bg-brand-pink hover:bg-brand-purple/80">
+            <Button onClick={sendMessage} className="bg-brand-pink hover:bg-brand-purple/80 text-base py-2">
               Send
             </Button>
           </div>
